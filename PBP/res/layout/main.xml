@@ -86,4 +86,11 @@
         </TableRow>
     </TableLayout>
 
+    <Button
+        android:id="@+id/login"
+        android:layout_width="298dp"
+        android:layout_height="70dp"
+        android:gravity="center"
+        android:text="Login" />   
+    
 </LinearLayout>
