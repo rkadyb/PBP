@@ -23,7 +23,10 @@ public final class R {
         public static final int button7=0x7f05000b;
         public static final int button8=0x7f05000c;
         public static final int button9=0x7f05000d;
-        public static final int login=0x7f05000e;
+        public static final int debug=0x7f050011;
+        public static final int linearLayout1=0x7f05000e;
+        public static final int login=0x7f05000f;
+        public static final int reset=0x7f050010;
         public static final int tableLayout1=0x7f050001;
         public static final int tableRow1=0x7f050002;
         public static final int tableRow2=0x7f050006;

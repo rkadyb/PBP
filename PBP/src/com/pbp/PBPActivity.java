@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class PBPActivity extends Activity {
@@ -111,6 +112,8 @@ public class PBPActivity extends Activity {
 			}
 		});
         
+        
+        // Assign the login button
         Button loginButton = (Button) findViewById(R.id.login); 
         
         loginButton.setOnClickListener(new OnClickListener() {
@@ -131,6 +134,10 @@ public class PBPActivity extends Activity {
 					}
 				}
 				
+				// DEBUG
+				TextView debug = (TextView) findViewById(R.id.debug);
+				debug.setText(passwordInput+" "+profile.toString()+" "+access);
+				
 				// Reset our variables
 				passwordInput = "";
 				profile.clear();
@@ -138,8 +145,26 @@ public class PBPActivity extends Activity {
 				
 				// Handle login success/failure
 				login(access);
+
 			}
 		});
+        
+        // Assign the reset button
+        Button resetButton = (Button) findViewById(R.id.reset);
+        
+        resetButton.setOnClickListener(new OnClickListener() {
+			
+			public void onClick(View v) {
+				password = null;
+				passwordInput = "";
+				profile.clear();
+				timer = new Timer();
+				
+				Toast toast = Toast.makeText(getApplicationContext(), "Password Reset", Toast.LENGTH_SHORT);
+		    	toast.show();
+			}
+		});
+        
         
         // Set the colors for the buttons
         button1.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
@@ -167,6 +192,9 @@ public class PBPActivity extends Activity {
 		timer.stop();
 		if (timer.start != 0) {
 			profile.add(timer.getTime());
+			
+			// Debug line
+			System.out.println(profile.toString());
 		}
 		timer.start();
     }

@@ -85,12 +85,32 @@
 
         </TableRow>
     </TableLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.40" >
 
-    <Button
-        android:id="@+id/login"
-        android:layout_width="298dp"
-        android:layout_height="70dp"
-        android:gravity="center"
-        android:text="Login" />   
+        <Button
+            android:id="@+id/login"
+            android:layout_width="146dp"
+            android:layout_height="70dp"
+            android:gravity="center"
+            android:text="Login" />
+
+        <Button
+            android:id="@+id/reset"
+            android:layout_width="146dp"
+            android:layout_height="70dp"
+            android:gravity="center"
+            android:text="Reset" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/debug"
+        android:layout_width="297dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.38" />
     
 </LinearLayout>
