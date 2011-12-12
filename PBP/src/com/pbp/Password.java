@@ -7,7 +7,7 @@ public class Password
 	// Create the values that store time timed data values.
 	private boolean debug = false;
 	private double[] mu, sigma;
-	private int[][] attempts;
+	private long[][] attempts;
 	private String login = "";
 	private int updates = 0, passHash = 0, length = 0, initCount = 10, updateCount = 20;
 	private boolean initialized = false;
@@ -17,13 +17,13 @@ public class Password
 	 * @param password The password for the user.
 	 * @param times The timed values associated with the password.
 	 */
-	public Password(String login, String password, ArrayList<Integer> times)
+	public Password(String login, String password, ArrayList<Long> times)
 	{
 		// Initialize all of the private variables.
 		this.login = login;
-		this.length = 2*(password.length()-1);
+		this.length = (password.length()-1);
 		this.passHash = password.hashCode();
-		this.attempts = new int[this.updateCount][this.length];
+		this.attempts = new long[this.updateCount][this.length];
 		this.mu = new double[this.length];
 		this.sigma = new double[this.length];
 		
@@ -44,7 +44,7 @@ public class Password
 	 * @param password The current password that was supplied.
 	 * @param times The values for each of the timed data points.
 	 */
-	public boolean initialize(String login, String password, ArrayList<Integer> times)
+	public boolean initialize(String login, String password, ArrayList<Long> times)
 	{
 		// If timing was messed up, don't allow.
 		if (times.size() != this.length)
@@ -81,7 +81,7 @@ public class Password
 	 * @param times The timed values for this input of the password.
 	 * @return 'True' if password and timing data are a match and 'False' otherwise.
 	 */
-	public boolean check(String login, String password, ArrayList<Integer> times)
+	public boolean check(String login, String password, ArrayList<Long> times)
 	{
 
 		// If timing was messed up, don't allow.
@@ -125,7 +125,7 @@ public class Password
 	 * This function updates the stored value list for each successful login attempt.
 	 * @param times The timed value for the current login.
 	 */
-	private void update(ArrayList<Integer> times)
+	private void update(ArrayList<Long> times)
 	{
 		// If timing was messed up, don't allow.
 		if (times.size() != this.length)
@@ -142,7 +142,7 @@ public class Password
 			double sum = 0, squares = 0;
 			for (int j = 0; j < count; j++)
 			{
-				int val = this.attempts[j][i];
+				long val = this.attempts[j][i];
 				sum += val;
 				squares += val*val;
 			}

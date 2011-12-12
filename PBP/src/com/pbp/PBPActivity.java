@@ -10,13 +10,16 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class PBPActivity extends Activity {
 	
 	// Used to hold the current login sequence
-	private String login;
+	private String passwordInput;
+	private String login = "rkd";
 	private Timer timer;
 	private ArrayList<Long> profile;
+	private Password password = null; 
 	
 	/**
 	 * Called at the start of the Activity, initializes the buttons and adds listeners
@@ -25,7 +28,7 @@ public class PBPActivity extends Activity {
         super.onCreate(savedInstanceState);
         
         // Initialize our login sequence to an empty string, initialize our timer, initialize the profile
-        login = "";
+        passwordInput = "";
         timer = new Timer();
         profile = new ArrayList<Long>();
         
@@ -48,63 +51,63 @@ public class PBPActivity extends Activity {
         button1.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "1";
+				passwordInput += "1";
 			}
 		});
         
         button2.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "2";
+				passwordInput += "2";
 			}
 		});
         
         button3.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "3";
+				passwordInput += "3";
 			}
 		});
         
         button4.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "4";
+				passwordInput += "4";
 			}
 		});
         
         button5.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "5";
+				passwordInput += "5";
 			}
 		});
         
         button6.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "6";
+				passwordInput += "6";
 			}
 		});
         
         button7.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "7";
+				passwordInput += "7";
 			}
 		});
         
         button8.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "8";
+				passwordInput += "8";
 			}
 		});
         
         button9.setOnClickListener(new OnClickListener() {     	
 			public void onClick(View v) {
 				onClickInternal();
-				login += "9";
+				passwordInput += "9";
 			}
 		});
         
@@ -114,11 +117,27 @@ public class PBPActivity extends Activity {
 			
 			public void onClick(View v) {
 				
+				boolean access = false;
+				
+				// First time, no password set yet
+				if (password == null) {
+					password = new Password(login, passwordInput, profile);
+				} else {
+					// Continue the initialization process
+					if (!password.isInitialized()) {
+						password.initialize(login, passwordInput, profile);
+					} else {
+						access = password.check(login, passwordInput, profile);
+					}
+				}
+				
 				// Reset our variables
-				login = "";
+				passwordInput = "";
 				profile.clear();
 				timer = new Timer();
 				
+				// Handle login success/failure
+				login(access);
 			}
 		});
         
@@ -130,6 +149,18 @@ public class PBPActivity extends Activity {
         button9.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
 
 
+    }
+    
+    public void login(boolean access) {
+    	
+    	String text = "Access Denied";
+    	
+    	if (access) {
+    		text = "Access Granted";
+    	}
+    	
+    	Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
+    	toast.show();
     }
     
     public void onClickInternal() {
