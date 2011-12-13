@@ -200,7 +200,7 @@ public class PBPActivity extends Activity {
 		
 		// DEBUG
 		TextView debug = (TextView) findViewById(R.id.debug);
-		debug.setText(passwordInput+" "+profile.toString()+" "+access+" "+password.isInitialized());
+		debug.setText(passwordInput+" "+profile.toString()+"\n"+"Granted: "+access+" init: "+password.isInitialized());
 		
 		// Reset our variables
 		passwordInput = "";
