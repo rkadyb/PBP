@@ -3,13 +3,13 @@ package com.pbp;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,7 +20,11 @@ public class PBPActivity extends Activity {
 	private String login = "rkd";
 	private Timer timer;
 	private ArrayList<Long> profile;
-	private Password password = null; 
+	private Password password = null;
+	
+	// Used to block all but the first move event across a button,
+	// resets when we move off to the next button		
+	private int blocked = 0;
 	
 	/**
 	 * Called at the start of the Activity, initializes the buttons and adds listeners
@@ -36,119 +40,6 @@ public class PBPActivity extends Activity {
         
         setContentView(R.layout.main);
         
-        Button button1 = (Button) findViewById(R.id.button1);
-        Button button2 = (Button) findViewById(R.id.button2);
-        Button button3 = (Button) findViewById(R.id.button3);
-        Button button4 = (Button) findViewById(R.id.button4);
-        Button button5 = (Button) findViewById(R.id.button5);
-        Button button6 = (Button) findViewById(R.id.button6);
-        Button button7 = (Button) findViewById(R.id.button7);
-        Button button8 = (Button) findViewById(R.id.button8);
-        Button button9 = (Button) findViewById(R.id.button9);
-        
-        
-        // Add all of the onClickListeners
-        
-        button1.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "1";
-			}
-		});
-        
-        button2.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "2";
-			}
-		});
-        
-        button3.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "3";
-			}
-		});
-        
-        button4.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "4";
-			}
-		});
-        
-        button5.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "5";
-			}
-		});
-        
-        button6.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "6";
-			}
-		});
-        
-        button7.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "7";
-			}
-		});
-        
-        button8.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "8";
-			}
-		});
-        
-        button9.setOnClickListener(new OnClickListener() {     	
-			public void onClick(View v) {
-				onClickInternal();
-				passwordInput += "9";
-			}
-		});
-        
-        
-        // Assign the login button
-        Button loginButton = (Button) findViewById(R.id.login); 
-        
-        loginButton.setOnClickListener(new OnClickListener() {
-			
-			public void onClick(View v) {
-				
-				boolean access = false;
-				
-				// First time, no password set yet
-				if (password == null) {
-					password = new Password(login, passwordInput, profile);
-				} else {
-					// Continue the initialization process
-					if (!password.isInitialized()) {
-						password.initialize(login, passwordInput, profile);
-					} else {
-						access = password.check(login, passwordInput, profile);
-					}
-				}
-				
-				// DEBUG
-				TextView debug = (TextView) findViewById(R.id.debug);
-				debug.setText(passwordInput+" "+profile.toString()+" "+access);
-				
-				// Reset our variables
-				passwordInput = "";
-				profile.clear();
-				timer = new Timer();
-				
-				// Handle login success/failure
-				login(access);
-
-			}
-		});
-        
         // Assign the reset button
         Button resetButton = (Button) findViewById(R.id.reset);
         
@@ -158,23 +49,168 @@ public class PBPActivity extends Activity {
 				password = null;
 				passwordInput = "";
 				profile.clear();
-				timer = new Timer();
 				
 				Toast toast = Toast.makeText(getApplicationContext(), "Password Reset", Toast.LENGTH_SHORT);
 		    	toast.show();
 			}
 		});
         
+        ImageButton main = (ImageButton) findViewById(R.id.main);
         
-        // Set the colors for the buttons
-        button1.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
-        button3.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
-        button5.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
-        button7.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
-        button9.getBackground().setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP));
+        main.setOnTouchListener(new OnTouchListener() {
+			
+			public boolean onTouch(View v, MotionEvent event) {
+				
+				int action = event.getAction();
+				
+				//Start of swipe
+				if (action == MotionEvent.ACTION_DOWN) {
+					System.out.println("Started");
+					timer.start();				
+				}
+				// End of swipe
+				else if (action == MotionEvent.ACTION_UP) {
+					System.out.println("Ended");
+					timer.stop();
+					login();
+				}
+				
+				// During swipe
+				else if (action == MotionEvent.ACTION_MOVE) {
+					//System.out.println("X: "+event.getX());
+					//System.out.println("Y: "+event.getY());
+					
+					float X = event.getX();
+					float Y = event.getY();
+					
+					// Area 1
+					if (X>38 && X<110 && Y>38 && Y<106 && blocked!=1) {
 
+						System.out.println("Swiped 1");
+						blocked = 1;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "1";
+					}
+					
+					// Area 2
+					else if (X>205 && X<275 && Y>35 && Y<108 && blocked!=2) {
 
+						System.out.println("Swiped 2");
+						blocked = 2;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "2";
+					}
+					
+					// Area 3
+					else if (X>376 && X<451 && Y>35 && Y<106 && blocked!=3) {
+
+						System.out.println("Swiped 3");
+						blocked = 3;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "3";
+					}
+					
+					// Area 4
+					else if (X>48 && X<110 && Y>199 && Y<267 && blocked!=4) {
+
+						System.out.println("Swiped 4");
+						blocked = 4;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "4";
+					}
+					
+					// Area 5
+					else if (X>199 && X<271 && Y>199 && Y<267 && blocked!=5) {
+
+						System.out.println("Swiped 5");
+						blocked = 5;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "5";
+					}
+					
+					// Area 6
+					else if (X>376 && X<446 && Y>199 && Y<267 && blocked!=6) {
+
+						System.out.println("Swiped 6");
+						blocked = 6;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "6";
+					}
+					
+					// Area 7
+					else if (X>37 && X<102 && Y>370 && Y<445 && blocked!=7) {
+
+						System.out.println("Swiped 7");
+						blocked = 7;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "7";
+					}
+					
+					// Area 8
+					else if (X>219 && X<268 && Y>370 && Y<445 && blocked!=8) {
+
+						System.out.println("Swiped 8");
+						blocked = 8;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "8";
+					}
+					
+					// Area 9
+					else if (X>380 && X<447 && Y>370 && Y<445 && blocked!=9) {
+
+						System.out.println("Swiped 9");
+						blocked = 9;
+						profile.add(System.currentTimeMillis());
+						passwordInput += "9";
+					}				
+				}
+				return false;
+			}
+		});
+
+        
     }
+        
+    
+    public void login() {
+    	boolean access = false;
+		
+    	if (passwordInput != "") {
+    		
+    		// Remove the first time point
+    		profile.remove(0);
+    		
+    		// Normalize the remaining time points
+    		for (int i=0;i<profile.size();i++) {
+    			profile.set(i, profile.get(i) - timer.start);
+    		}
+    		
+    		// First time, no password set yet
+    		if (password == null) {
+    			password = new Password(login, passwordInput, profile);
+    		} else {
+    			// Continue the initialization process
+    			if (!password.isInitialized()) {
+    				password.initialize(login, passwordInput, profile);
+    			} else {
+    				access = password.check(login, passwordInput, profile);
+    			}
+    		}
+    	}
+		
+		// DEBUG
+		TextView debug = (TextView) findViewById(R.id.debug);
+		debug.setText(passwordInput+" "+profile.toString()+" "+access+" "+password.isInitialized());
+		
+		// Reset our variables
+		passwordInput = "";
+		profile.clear();
+		blocked = 0;
+		
+		// Handle login success/failure
+		login(access);
+    }
+    
     
     public void login(boolean access) {
     	
@@ -188,14 +224,4 @@ public class PBPActivity extends Activity {
     	toast.show();
     }
     
-    public void onClickInternal() {
-		timer.stop();
-		if (timer.start != 0) {
-			profile.add(timer.getTime());
-			
-			// Debug line
-			System.out.println(profile.toString());
-		}
-		timer.start();
-    }
 }
