@@ -20,6 +20,7 @@ public class Password
 	
 	/**
 	 * The constructor for a new password.
+	 * @param login The username/login
 	 * @param password The password for the user.
 	 * @param times The timed values associated with the password.
 	 */
