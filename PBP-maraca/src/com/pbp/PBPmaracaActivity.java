@@ -6,10 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
-public class PBPgaitActivity extends Activity {
+public class PBPmaracaActivity extends Activity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -32,7 +31,7 @@ public class PBPgaitActivity extends Activity {
 			
 			public void onClick(View v) {
 				// Start a new Gait Recorder
-				Intent intent = new Intent(getApplicationContext(), GaitRecorder.class);
+				Intent intent = new Intent(getApplicationContext(), ShakeRecorder.class);
 				startActivity(intent);
 			}
 		});
