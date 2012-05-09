@@ -14,7 +14,7 @@ public class Password
 	private double[] mu, sigma;
 	private long[][] attempts;
 	private String login = "";
-	private int updates = 0, passHash = 0, length = 0, initCount = 10, updateCount = 10;
+	private int updates = 0, passHash = 0, length = 0, initCount = 5, updateCount = 5;
 	private double mean = 0.0;
 	private boolean initialized = false;
 	

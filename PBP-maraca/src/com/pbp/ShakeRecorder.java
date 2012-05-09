@@ -15,12 +15,10 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 	// Even at the slowest setting, the sensor is too fast for what we are trying to do
 	private int count = 18;
 	
-	//private ArrayList<Float> accelProfile = new ArrayList<Float>();
-	//private ArrayList<Long> timingProfile = new ArrayList<Long>();
-	
 	private boolean done;
 	private boolean wait;
 	private boolean access;
+	private boolean end;
 	
 	TextView xCoord;
 	TextView yCoord;
@@ -46,6 +44,7 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 
 		done = false;
 		wait = false;
+		end = false;
 		
 		// Clear out our variables
 		PBPmaracaActivity.passwordInput = "";
@@ -85,32 +84,37 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 				
 				PBPmaracaActivity.timingProfile.add(timingValue);
 				
-				String value = (y > 0) ? "1" : "0";
-				PBPmaracaActivity.passwordInput += value;
+				//String value = (y > 0) ? "1" : "0";
+				PBPmaracaActivity.passwordInput += "1";
 			}
 			
 			if (PBPmaracaActivity.timingProfile.size() == 5) {
 				done = true;
-				PBPmaracaActivity.timingProfile.set(0, 0L);
+				//PBPmaracaActivity.timingProfile.set(0, 0L);
+				PBPmaracaActivity.timingProfile.remove(0);
 			}
 			
 			results.setText(PBPmaracaActivity.timingProfile.toString() +"\n"+ PBPmaracaActivity.passwordInput);
 			
 		}
 		
-		if (done) {
+		if (done && !end) {
     		// First time, no password set yet
     		if (PBPmaracaActivity.password == null) {
     			PBPmaracaActivity.password = new Password(PBPmaracaActivity.login, PBPmaracaActivity.passwordInput, PBPmaracaActivity.timingProfile);
+				accessBox.setText("Password Created");
     		} else {
     			// Continue the initialization process
     			if (!PBPmaracaActivity.password.isInitialized()) {
     				PBPmaracaActivity.password.initialize(PBPmaracaActivity.login, PBPmaracaActivity.passwordInput, PBPmaracaActivity.timingProfile);
+    				accessBox.setText("Continuing Initialization");
     			} else {
     				access = PBPmaracaActivity.password.check(PBPmaracaActivity.login, PBPmaracaActivity.passwordInput, PBPmaracaActivity.timingProfile);
     				accessBox.setText(String.valueOf(access));
     			}
     		}
+    		
+    		end = true;
 		}
 	}
 
