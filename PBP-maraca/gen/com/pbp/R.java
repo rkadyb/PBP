@@ -14,6 +14,7 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
+        public static final int access=0x7f05000a;
         public static final int record=0x7f050001;
         public static final int resetAll=0x7f050003;
         public static final int results=0x7f050009;

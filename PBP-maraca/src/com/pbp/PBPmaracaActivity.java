@@ -1,5 +1,7 @@
 package com.pbp;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +11,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 public class PBPmaracaActivity extends Activity {
+	
+	public static String passwordInput;
+	public static String login = "rkd";
+	public static Password password = null;
+	public static ArrayList<Long> timingProfile = new ArrayList<Long>();
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +38,7 @@ public class PBPmaracaActivity extends Activity {
         recordButton.setOnClickListener(new OnClickListener() {
 			
 			public void onClick(View v) {
-				// Start a new Gait Recorder
+				// Start a new Shake Recorder
 				Intent intent = new Intent(getApplicationContext(), ShakeRecorder.class);
 				startActivity(intent);
 			}

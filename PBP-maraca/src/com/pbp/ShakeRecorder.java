@@ -1,7 +1,5 @@
 package com.pbp;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,17 +13,19 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 	private SensorManager sensorManager;
 
 	// Even at the slowest setting, the sensor is too fast for what we are trying to do
-	private int skip = 9;
-	private int count = 0;
+	private int count = 18;
 	
-	private ArrayList<Float> accelProfile = new ArrayList<Float>();
-	private ArrayList<Long> timingProfile = new ArrayList<Long>();
+	//private ArrayList<Float> accelProfile = new ArrayList<Float>();
+	//private ArrayList<Long> timingProfile = new ArrayList<Long>();
 	
 	private boolean done;
+	private boolean wait;
+	private boolean access;
 	
 	TextView xCoord;
 	TextView yCoord;
 	TextView zCoord;
+	TextView accessBox;
 	
 	TextView results;
 	
@@ -39,10 +39,17 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 		
 		results = (TextView) findViewById(R.id.results);
 		
+		accessBox = (TextView) findViewById(R.id.access);
+		
 		sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
 		sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION), SensorManager.SENSOR_DELAY_UI); //.SENSOR_DELAY_NORMAL);
 
 		done = false;
+		wait = false;
+		
+		// Clear out our variables
+		PBPmaracaActivity.passwordInput = "";
+		PBPmaracaActivity.timingProfile.clear();
     }
     
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -50,8 +57,13 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 	}
 
 	public void onSensorChanged(SensorEvent event) {
-		count++;
-		if ((count % skip == 0) && 
+		if (wait) {
+			count--;
+			if (count == 0) {
+				wait = false;
+			}
+		}
+		if (!wait && 
 			(event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION)) {
 
 			float x = event.values[0];
@@ -63,23 +75,42 @@ public class ShakeRecorder extends Activity implements SensorEventListener {
 			zCoord.setText("Z: " + z);
 			
 			if (!done && (Math.abs(y) > 4)) {
+				wait = true;
+				count = 15;
 				Long timingValue = System.currentTimeMillis();
 				
-				if (timingProfile.size() > 0) {
-					timingValue -= timingProfile.get(0);
+				if (PBPmaracaActivity.timingProfile.size() > 0) {
+					timingValue -= PBPmaracaActivity.timingProfile.get(0);
 				}
 				
-				timingProfile.add(timingValue);
-				accelProfile.add(y);
+				PBPmaracaActivity.timingProfile.add(timingValue);
+				
+				String value = (y > 0) ? "1" : "0";
+				PBPmaracaActivity.passwordInput += value;
 			}
 			
-			if (timingProfile.size() == 10) {
+			if (PBPmaracaActivity.timingProfile.size() == 5) {
 				done = true;
-				timingProfile.set(0, 0L);
+				PBPmaracaActivity.timingProfile.set(0, 0L);
 			}
 			
-			results.setText(timingProfile.toString() +"\n"+ accelProfile.toString());
+			results.setText(PBPmaracaActivity.timingProfile.toString() +"\n"+ PBPmaracaActivity.passwordInput);
 			
+		}
+		
+		if (done) {
+    		// First time, no password set yet
+    		if (PBPmaracaActivity.password == null) {
+    			PBPmaracaActivity.password = new Password(PBPmaracaActivity.login, PBPmaracaActivity.passwordInput, PBPmaracaActivity.timingProfile);
+    		} else {
+    			// Continue the initialization process
+    			if (!PBPmaracaActivity.password.isInitialized()) {
+    				PBPmaracaActivity.password.initialize(PBPmaracaActivity.login, PBPmaracaActivity.passwordInput, PBPmaracaActivity.timingProfile);
+    			} else {
+    				access = PBPmaracaActivity.password.check(PBPmaracaActivity.login, PBPmaracaActivity.passwordInput, PBPmaracaActivity.timingProfile);
+    				accessBox.setText(String.valueOf(access));
+    			}
+    		}
 		}
 	}
 
