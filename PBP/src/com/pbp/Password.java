@@ -3,18 +3,29 @@ package com.pbp;
 
 import java.util.ArrayList;
 
-public class Password 
+public class Password
 {
 	// Global Variables
-	private final int VARIANCE_THRESH = 15, BAD_FAIL_RATE = 4;
-	private final double GAUSS_WIDTH = 3.0, VAR_ADJUST = 800.0;
+	private int VARIANCE_THRESH = 15;
+	private final int BAD_FAIL_RATE = 4;
+	private double GAUSS_WIDTH = 3.0;
+	private final double VAR_ADJUST = 800.0;
+	
+	// Set how we are entering values into the timing profile, either 
+	// in-between values or the overall running times
+	public enum TimingMode {
+		BETWEEN, TOTAL
+	}
+	
+	// Default timing mode
+	private TimingMode tm = TimingMode.TOTAL;
 	
 	// Create the values that store time timed data values.
 	private boolean debug = false;
 	private double[] mu, sigma;
 	private long[][] attempts;
 	private String login = "";
-	private int updates = 0, passHash = 0, length = 0, initCount = 5, updateCount = 5;
+	private int updates = 0, passHash = 0, length = 0, initCount = 3, updateCount = 3;
 	private double mean = 0.0;
 	private boolean initialized = false;
 	
@@ -66,12 +77,95 @@ public class Password
 		
 			// If the password has been fully initialized, save its state.
 			if (this.updates >= this.initCount)
+			{
 				this.initialized = true;
-			
+				// Train the Variance and Gaussian Width to fit our data set
+				setConstants(tm);
+				
+			}
 			return true;
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * A private function that configures our Variance and Gaussian Width Parameters
+	 * given the training data.
+	 * 
+	 */
+	private void setConstants(TimingMode tm) {
+		double [] interval_mu = new double[this.length];
+		if (tm == TimingMode.TOTAL) {
+			for (int i=this.length-1; i>=0; i--) {
+				if (i == 0) {
+					interval_mu[0] = this.mu[0];
+				} else {
+					interval_mu[i] = this.mu[i] - this.mu[i-1];
+				}
+			}
+		} else {
+			interval_mu = this.mu;
+		}
+		
+		double mean_interval_mu = getMean(interval_mu);
+		
+		double median_interval_mu = getMedian(interval_mu);
+		
+		double range_mu = getRange(interval_mu);
+		
+		double deciding_factor;
+		
+		// if our timing inputs vary by 2 or more orders of magnitude,
+		// assume that using the median gets rid of outliers
+		if (range_mu > 50) {
+			deciding_factor = median_interval_mu;
+		} else {
+			deciding_factor = mean_interval_mu;
+		}
+		
+		double log_val = Math.log10(deciding_factor);
+		log_val = (log_val > 1.0) ? log_val : 1.0;
+		
+		GAUSS_WIDTH = 4.0 - log_val;
+		GAUSS_WIDTH = (GAUSS_WIDTH > 1.0) ? GAUSS_WIDTH : 1.0;
+		VARIANCE_THRESH = (int) (16.0 - log_val);
+		
+		if (debug) {
+			System.out.println("mean "+mean_interval_mu);
+			System.out.println("median "+median_interval_mu);
+			System.out.println("range "+range_mu);
+			System.out.println("log val "+log_val);
+			System.out.println("GW "+GAUSS_WIDTH);
+			System.out.println("Var "+VARIANCE_THRESH);
+		}
+	}
+	
+	private static double getMean(double[] values) {
+		double mean = 0;
+		for (int i=0; i<values.length; i++) {
+			mean += values[i];
+		}
+		mean /= values.length;
+		return mean;
+	}
+	
+	private static double getMedian(double[] values) {
+		MergeSort ms = new MergeSort();
+		ms.sort(values);
+		double median = values[values.length/2]; 
+		return median;
+	}
+	
+	/**
+	 * Returns the scaling difference between the largest and smallest values
+	 * @param values
+	 * @return
+	 */
+	private static double getRange(double[] values) {
+		MergeSort ms = new MergeSort();
+		ms.sort(values);
+		return Math.abs(values[values.length-1]/values[0]);
 	}
 	
 	/**
